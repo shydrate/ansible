@@ -1,0 +1,33 @@
+---
+ - hosts: 192.168.122.155
+   become: yes
+   tasks:
+
+     - name: install the prerequisite packages
+       apt:
+         name: "{{ item }}"
+         state: present
+         update_cache: yes
+       with_items:
+          - libpcre2-dev 
+          - build-essential
+          - zlib1g-dev  
+     - name: Download ossec client
+       get_url:
+         url: https://github.com/ossec/ossec-hids/archive/3.3.0.tar.gz
+         dest: /opt/
+         
+     - name: Extract the ossec client file
+       unarchive:
+         src: /opt/ossec-hids-3.3.0.tar.gz
+         dest: /opt/   
+         remote_src: yes
+     - name: Copy the Ossec_input file
+       copy: 
+         src: /etc/ansible/roles/ossec-client/templates/ossec_client_input.j2 
+         dest: /opt/ossec-hids-3.3.0/
+     - name: 
+       shell: sudo PCRE2_SYSTEM=yes bash /opt/ossec-hids-3.3.0/install.sh < /opt/ossec-hids-3.3.0/ossec_client_input.j2
+       
+
+       
